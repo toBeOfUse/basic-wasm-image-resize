@@ -1,0 +1,41 @@
+<html>
+
+<head>
+    <title>resize</title>
+    <script src="resize.js"></script>
+</head>
+
+<body>
+    <script>
+        function fileToArrayBuffer(file) {
+            return new Promise((resolve, reject) => {
+                const fr = new FileReader();
+                fr.onload = (e) => {
+                    resolve(e.target.result);
+                }
+                fr.readAsArrayBuffer(file);
+            })
+        }
+
+        async function go() {
+            const imageIn = document.querySelector("#imageInput");
+            if (!imageIn.files.length) {
+                alert("no image is there :(")
+                return;
+            }
+            const imageBuffer = await fileToArrayBuffer(imageIn.files[0]);
+            FS.writeFile(imageIn.files[0].name, new Uint8Array(imageBuffer));
+            const newf = Module.resize(imageIn.files[0].name, 0, 600);
+            const newi = FS.readFile(newf);
+            const newb = new Blob([newi], {type: imageIn.files[0].type});
+            const newie = document.createElement("img");
+            newie.src = URL.createObjectURL(newb);
+            document.body.appendChild(newie);
+        }
+    </script>
+    <p>image in</p>
+    <input type="file" id="imageInput">
+    <button onclick="go()">image out -></button>
+</body>
+
+</html>
